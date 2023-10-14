@@ -20,13 +20,13 @@ mi.add_image(buildings_path)
 
 # Kết quả
 # 1. Ảnh gốc
-mi.show_image(at=1)
+mi.show_image(title="Original")
 
 # 2. Show ảnh xám
-mi.show_image(at=1, color=cv2.COLOR_RGB2GRAY)
+mi.show_image(title="Gray", color=cv2.COLOR_RGB2GRAY)
 
 # 3. Làm mờ ảnh
-mi.show_blur(at=1)
+mi.show_blur(title="Blur", x=10)
 
 # 4. Phát hiện cạnh
-mi.show_edge_canny(at=1, dx=100, dy=200)
+mi.show_edge_canny(title="Edge detection", dx=100, dy=200)
