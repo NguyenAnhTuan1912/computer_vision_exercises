@@ -8,6 +8,9 @@ from typing import Type, Union
 # Sẽ được cập nhật thêm.
 
 __root__ = "data"
+__xml__ = "xml"
+
+__haarcascade__ = "/haarcascade"
 
 class MyImage:
   """
@@ -17,6 +20,14 @@ class MyImage:
   Dùng để tạo ra một đối tượng để thực hiện các thao tác trên ảnh. Object này
   sẽ giữ một hay nhiều tấm ảnh trong nó, để tiện cho việc mình có thể dùng lại sau.
   
+  Hiện tại object có hỗ trợ một số chức năng sau:
+  - Lưu/xóa/đọc ảnh.
+  - Convert màu cho ảnh (có hỗ trợ từ cv2).
+  - Hiển thị ảnh mờ.
+  - Phát hiện cạnh.
+  - Phát hiện khuôn mặt.
+  
+  @example
   >>> mi = MyImage(root_path) ## root mặc định là "/data".
   >>> ## Thêm một tấm ảnh vào cuối.
   >>> mi.add_image(path, cv2.COLOR_GRAY2BGR)
@@ -29,8 +40,11 @@ class MyImage:
   
   
   def __init__(self, root: str = __root__):
-    self.root = root
+    self.root_path = root
+    self.xml_root__path = __xml__
     self.images = []
+    self.face_cascade = cv2.CascadeClassifier(self.xml_root__path + __haarcascade__ + '/haarcascade_frontalface_default.xml')
+    self.eyes_cascade = cv2.CascadeClassifier(self.xml_root__path + __haarcascade__ + '/haarcascade_eye_tree_eyeglasses.xml')
   
   
   
@@ -44,13 +58,13 @@ class MyImage:
     Private
     Phương thức này dùng cv2 dể đọc một file ảnh bằng cv2.
     
-    - param path: đường dẫn tới ảnh cần lấy, đường dẫn phải là `/path` mới hợp lệ.
-    - param color: màu cho ảnh. Lấy từ cv2.
+    :param path: đường dẫn tới ảnh cần lấy, đường dẫn phải là `/path` mới hợp lệ.
+    :param color: màu cho ảnh. Lấy từ cv2.
     """
     try:
       if color == None:
-        return cv2.imread(self.root + path)
-      return cv2.imread(self.root + path, color)
+        return cv2.imread(self.root_path + path)
+      return cv2.imread(self.root_path + path, color)
       
     except Exception as e:
       print(str(e))
@@ -65,7 +79,7 @@ class MyImage:
     """
     Private
     Phương thức này dùng để lấy một ảnh đã được thêm ở trong list
-    - param at: vị trí của ảnh muốn lấy.
+    :param at: vị trí của ảnh muốn lấy.
     """
     if at == None:
        at = len(self.images) - 1
@@ -84,9 +98,9 @@ class MyImage:
     Private
     Phương thức này dùng để lấy ra ảnh mờ.
     
-    - param x: độ mờ, tạm hiểu là thế :3
-    - param ddepth: độ sâu.
-    - param at: vị trí ảnh trong list muốn làm mờ.
+    :param x: độ mờ, tạm hiểu là thế :3
+    :param ddepth: độ sâu.
+    :param at: vị trí ảnh trong list muốn làm mờ.
     """
     try:
       kernel = np.ones((x, x), np.float32) / (x * x * 1.0)
@@ -111,9 +125,9 @@ class MyImage:
     """
     Phương thức này sẽ trả về một canny. Sẽ được cập nhập thêm.
     
-    - param at: Vị trí ảnh muốn show.
-    - param dx:
-    - param dy:
+    :param at: Vị trí ảnh muốn show.
+    :param dx:
+    :param dy:
     """
     try:
       # Chuyển ảnh về GRAYSCALE và hiển thị cạnh.
@@ -130,17 +144,20 @@ class MyImage:
   def convert_color(
     self,
     color: int,
-    at: int = None
+    at: int = None,
+    img: cv2.typing.MatLike = None
   ):
     """
     Phương thức này dùng để chuyển một ảnh sang màu khác.
     
-    - param color: màu muốn convert.
-    - param at: Vị trí ảnh muốn convert.
+    :param color: màu muốn convert.
+    :param at: Vị trí ảnh muốn convert.
+    :param img: ảnh khác.
     """
     try:
       # Lấy ảnh
-      img = self.__get_image_in_list(at)
+      if img is None:
+        img = self.__get_image_in_list(at)
       
       # Chuyển ảnh về GRAYSCALE và hiển thị cạnh.
       converted_img = cv2.cvtColor(img, color)
@@ -149,7 +166,6 @@ class MyImage:
       return converted_img
     except Exception as e:
       print(str(e))
-    
   
   
   
@@ -162,8 +178,8 @@ class MyImage:
     """
     Phương thức này dùng để thêm một ảnh vào trong danh sách.
     
-    - param path: đường dẫn tới ảnh ở thư mục data.
-    - param color: màu cho ảnh.
+    :param path: đường dẫn tới ảnh ở thư mục data.
+    :param color: màu cho ảnh.
     """
     try:
       self.images.append(self.__get_image_cv2(path, color))
@@ -181,7 +197,7 @@ class MyImage:
     Dùng phương thức này để remove một ảnh ra khỏi list. Nếu như không có at
     thì sẽ tự động xóa ảnh cuối danh sách. Ngược lại, nếu có thì xóa tại at.
     
-    - param at: vị trí ảnh cần xóa.
+    :param at: vị trí ảnh cần xóa.
     """
     try:
       if at == None:
@@ -203,9 +219,9 @@ class MyImage:
     Phương thức này dùng cv2 để hiển thị một ảnh. Nếu như không có at thì nó sẽ
     tự động hiện ảnh được thêm cuối cùng
     
-    - param title: title cho cửa số hiện ảnh.
-    - param at: hiển thị một ảnh ở một vị trí nào đó.
-    - param color: màu muốn hiển thị. Lưu ý những ảnh từ đầu không phải ở màu gốc!
+    :param title: title cho cửa số hiện ảnh.
+    :param at: hiển thị một ảnh ở một vị trí nào đó.
+    :param color: màu muốn hiển thị. Lưu ý những ảnh từ đầu không phải ở màu gốc!
     
     @example
     >>> mi.show_image("Hello")
@@ -237,12 +253,12 @@ class MyImage:
     dy: cv2.UMat = 10
   ):
     """
-    Phương thức này sẽ detect cạnh với cv2.Canny. Sẽ được cập nhập thêm.
+    Phương thức này sẽ detect cạnh với cv2.Canny. Sẽ được cập nhật thêm.
     
-    - param title: Tiêu đề cho window.
-    - param at: Vị trí ảnh muốn show.
-    - param dx:
-    - param dy:
+    :param title: Tiêu đề cho window.
+    :param at: Vị trí ảnh muốn show.
+    :param dx:
+    :param dy:
     """
     try:
       if title == None:
@@ -268,22 +284,91 @@ class MyImage:
     at: int = None
   ):
     """
-    Phương thức này sẽ detect cạnh với cv2.Canny. Sẽ được cập nhập thêm.
+    Phương thức này hiển thị ra ảnh mờ.
     
-    - param title: tiêu đề cho window.
-    - param x: độ mờ, tạm hiểu là thế :3
-    - param ddepth: độ sâu.
-    - param at: vị trí ảnh trong list muốn làm mờ.
+    :param title: title cho cửa số hiện ảnh.
+    :param x: độ mờ, tạm hiểu là thế :3
+    :param ddepth: độ sâu.
+    :param at: vị trí ảnh trong list muốn làm mờ.
     """
     try:
       if title == None:
         title = "Blur image {}x{}".format(x, x)
       
-      # Chuyển ảnh về GRAYSCALE và hiển thị cạnh.
+      # Lấy ảnh mờ
       blur = self.__get_blur_image(x, ddepth, at)
       
       # Show
       cv2.imshow(title, blur)
       cv2.waitKey(0)
+    except Exception as e:
+      print(str(e))
+      
+      
+      
+  # FACE DETECTION
+  def detect_face_cc(
+    self,
+    title: str = None,
+    at: int = None,
+    scaleFactor: float = 1.2,
+    minNeighbors: int = 1,
+    img: cv2.typing.MatLike = None,
+    canWait: bool = True,
+    hasEyes: bool = False,
+    hasFace: bool = True
+  ):
+    """
+    Phương thức này dùng để phát hiện khuôn mặt trong ảnh. Truyền biết at để
+    phát hiện khuôn mặt tại ảnh nào đó, nếu không thì nó sẽ dùng ảnh cuối.
+    
+    Ngoài ra thì có thể truyền cho nó một tấm ảnh bên ngoài.
+    
+    :param title: title cho cửa số hiện ảnh.
+    :param at: vị trí ảnh trong list muốn làm mờ.
+    :param scaleFactor: số nhân mở rộng vùng nhận diện khuôn mặt.
+    :param minNeighbors: .
+    :param img: ảnh khác.
+    :param canWait: cho biết là có chờ cửa sổ hiển thị hay không?
+    :param hasEyes: cho biết là có nhận diện mặt không?
+    :param hasFace: cho biết là có nhận diện mặt không? Mặc định là có.
+    """
+    try:
+      if title == None:
+        title = "Face detection with Cascade Classifier"
+      
+      # Lấy ảnh GRAY.abs
+      gray_img = None
+      
+      # Lấy ảnh gốc.
+      if img is not None:
+        gray_img = self.convert_color(cv2.COLOR_RGB2GRAY, img=img)
+      else:
+        img = self.__get_image_in_list(at)
+        gray_img = self.convert_color(cv2.COLOR_RGB2GRAY, at)
+      
+      # Tọa độ của một hoặc nhiều mặt.
+      faces = self.face_cascade.detectMultiScale(gray_img, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
+
+      for (x, y, w, h) in faces:
+        
+        # Nếu như có nhận diện mặt thì làm thêm mắt.
+        if hasEyes:
+          roi_gray = gray_img[y:y+h, x:x+w]
+          roi_color = img[y:y+h, x:x+w]
+          
+          # Lấy tọa độ của eye.
+          eyes = self.eyes_cascade.detectMultiScale(roi_gray, scaleFactor=scaleFactor, minNeighbors=minNeighbors)
+          for (ex, ey, ew, eh) in eyes:
+            # Vẽ vùng nhận diện mắt lên phần ảnh.
+            cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 255), 2)
+          
+        # Vẽ vùng nhận diện mặt lên ảnh.
+        if hasFace:
+          cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
+      
+      # Show
+      cv2.imshow(title, img)
+      if canWait: cv2.waitKey(0)
     except Exception as e:
       print(str(e))
