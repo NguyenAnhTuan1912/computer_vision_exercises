@@ -35,7 +35,6 @@ class MyImage:
   >>> mi.add_image(path)
   >>> ## Hiển thị ảnh ở cuối danh sách.
   >>> mi.show_image()
-  
   """
   
   
