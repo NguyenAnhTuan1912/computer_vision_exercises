@@ -33,3 +33,11 @@ Tuần này mình chưa tạo, nhưng mà bài dễ thôi.
 
 ### Week 2
 Xem thêm [tại đây](/weeks/week_02)
+
+### Week 3
+__Note__: Từ tuần này trở đi thì bài tập sẽ được làm và gộp chung ở trên Google Colab.
+
+Xem thêm [tại đây](/weeks/week_03)
+
+### Week 4
+Xem thêm [tại đây](/weeks/week_04)

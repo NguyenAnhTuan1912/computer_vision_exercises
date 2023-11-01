@@ -7,6 +7,7 @@ Viết chương trình đọc vào một file ảnh. Làm những yêu cầu sau
 - Làm mở ảnh.
 - Phát hiện cạnh.
 - Hiển thị ảnh gốc, ảnh xám, mờ cạnh.
+
 [__Solved__](./prob01.py)
 
 ### Problem 02
